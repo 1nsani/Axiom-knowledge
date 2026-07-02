@@ -56,7 +56,7 @@ def analyze_physics_problem(problem_text):
 
 # --- UJI COBA MESIN M-2 LOKAL ---
 soal_dummy = "Sebuah balok bermassa 4 kg ditarik ke atas bidang miring licin (sudut 30 derajat) dengan gaya 50 N."
-hasil_analisis = analyze_physics_problem_local(soal_dummy)
+hasil_analisis = analyze_physics_problem(soal_dummy)
 
 print("INPUT SOAL:", soal_dummy)
 print("-" * 40)
