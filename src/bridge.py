@@ -1,32 +1,47 @@
 import json
-import os
 from google import genai
 from google.genai import types
-from pydantic import BaseModel, Field
 
-# Skema Kontrak Baku
-# Jika repo 'axiom' (Manim) butuh variabel lain, tambahkan HANYA di sini.
-class ManimPhysicsData(BaseModel):
-    massa: float = Field(description="Massa objek dalam kg")
-    sudut_kemiringan: float = Field(description="Sudut bidang miring dalam derajat")
-    gaya_tarik: float = Field(description="Gaya eksternal yang menarik objek dalam Newton")
-    percepatan: float = Field(description="Hasil akhir percepatan dalam m/s^2")
-    arah_gerak: str = Field(description="Arah pergerakan: 'ke_atas', 'ke_bawah', atau 'diam'")
-
-def convert_to_manim_data(solver_output_text, api_key, output_filename="anim_input.json"):
+def convert_to_manim_data(solver_output_text, visual_config, api_key, output_filename="anim_input.json"):
     """
-    M-6 Bridge: Memaksa teks dinamis menjadi data statis (JSON).
-    File JSON ini adalah satu-satunya bentuk komunikasi dengan repo 'axiom'.
+    K-5 Bridge: Menerjemahkan angka hitungan ke dalam template visual dari Obsidian.
+    Sistem ini agnostik. Tidak peduli bidang miring atau katrol.
     """
     if not api_key:
         return None, {"error": "API Key tidak ditemukan."}
 
     client = genai.Client(api_key=api_key)
     
-    system_instruction = """
-    Anda adalah ekstraktor data deterministik. 
-    Baca solusi fisika yang diberikan dan ekstrak nilai numeriknya ke dalam format JSON.
-    Hanya ekstrak angkanya, jangan sertakan satuannya.
+    # Memaksa Gemini merakit JSON berdasarkan blueprint Obsidian
+    blueprint_json = json.dumps(visual_config, indent=2)
+    
+    system_instruction = f"""
+    Anda adalah mesin JSON formatter.
+    Ekstrak nilai numerik dari teks solusi fisika, dan gabungkan dengan blueprint visual ini:
+    
+    BLUEPRINT OBSIDIAN:
+    {blueprint_json}
+    
+    OUTPUT WAJIB BERUPA JSON DENGAN STRUKTUR INI:
+    {{
+        "scene_type": "<isi_dari_blueprint>",
+        "parameters": {{
+            "massa": <angka>,
+            "percepatan": <angka>,
+            "arah_gerak": "<ke_atas/ke_bawah/diam>"
+        }},
+        "vectors_to_render": [
+            {{
+                "id": "<id_dari_blueprint>",
+                "type": "<type_dari_blueprint>",
+                "direction_logic": "<direction_logic_dari_blueprint>",
+                "color": "<color_dari_blueprint>",
+                "label": "<label_dari_blueprint>"
+            }}
+            // ... masukkan SEMUA vektor yang ada di blueprint
+        ]
+    }}
+    HANYA keluarkan JSON murni tanpa markdown formatter.
     """
     
     try:
@@ -37,18 +52,16 @@ def convert_to_manim_data(solver_output_text, api_key, output_filename="anim_inp
                 system_instruction=system_instruction,
                 temperature=0.0,
                 response_mime_type="application/json",
-                response_schema=ManimPhysicsData,
             ),
         )
         
         manim_data = json.loads(response.text)
         
-        # Eksekusi I/O: Menulis file ke disk
-        # File ini akan terbuat di direktori di mana skrip utama (main.py) dijalankan
         with open(output_filename, "w") as f:
             json.dump(manim_data, f, indent=4)
             
         return output_filename, manim_data
         
     except Exception as e:
-        return None, {"error": f"Ekstraksi M-6 gagal: {str(e)}"}
+        return None, {"error": f"Ekstraksi K-5 gagal: {str(e)}"}
+        
