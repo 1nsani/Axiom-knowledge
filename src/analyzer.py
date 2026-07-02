@@ -1,7 +1,7 @@
 import json
 import re
 
-def analyze_physics_problem_local(problem_text):
+def analyze_physics_problem(problem_text):
     """
     Mesin M-2 tanpa API. Menggunakan pencocokan pola deterministik
     untuk mengekstrak struktur ontologi fisika.
