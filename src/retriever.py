@@ -1,5 +1,5 @@
 import os
-import yaml # Gunakan pyyaml untuk membaca frontmatter secara presisi
+import yaml
 
 def parse_obsidian_file(filepath):
     """Membelah YAML Frontmatter dan Markdown Body"""
@@ -27,7 +27,17 @@ def retrieve_knowledge(m2_output, repo_path="./metadata"):
     dependencies = []
     
     if domain:
-        domain_file = domain.replace("dinamika_", "") + ".md" # misal: bidang_miring.md
+        # LOGIKA PEMETAAN ABSOLUT
+        # Kita mendikte mesin, bukan membiarkannya memotong string sembarangan
+        if domain == "bidang_miring":
+            domain_file = "bidang_miring.md"
+        elif domain == "katrol":
+            domain_file = "katrol.md"
+        elif domain == "translasi" or domain == "dinamika_translasi":
+            domain_file = "translasi.md"
+        else:
+            domain_file = f"{domain}.md" # Fallback terakhir
+            
         domain_path = os.path.join(repo_path, "domain", domain_file)
         
         if os.path.exists(domain_path):
@@ -40,7 +50,7 @@ def retrieve_knowledge(m2_output, repo_path="./metadata"):
         else:
             print(f"[-] PERINGATAN: Skenario {domain_file} tidak ditemukan di {domain_path}")
 
-    # 2. Ambil Hukum Fundamental (Dari Dependencies YAML, BUKAN dari M-2)
+    # 2. Ambil Hukum Fundamental (Dari Dependencies YAML)
     for hukum in dependencies:
         path = os.path.join(repo_path, "hukum_dasar", f"{hukum}.md")
         if os.path.exists(path):
@@ -48,7 +58,7 @@ def retrieve_knowledge(m2_output, repo_path="./metadata"):
             _, body = parse_obsidian_file(path)
             knowledge_context += f"\n>>> [FUNDAMENTAL: {hukum}] <<<\n{body}\n"
         else:
-            print(f"[-] PERINGATAN: Dependensi {hukum}.md tidak ditemukan.")
+            print(f"[-] PERINGATAN: Dependensi {hukum}.md tidak ditemukan di rute {path}")
 
     return knowledge_context, visual_config
     
