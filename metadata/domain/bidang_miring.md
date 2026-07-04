@@ -12,17 +12,17 @@ visual_hooks:
       type: "arrow"
       direction_logic: "parallel_up"
       color: "GREEN"
-      label: "\\vec{F}"
+      label: "\vec{F}"
     - id: "N"
       type: "arrow"
       direction_logic: "perpendicular_up"
       color: "YELLOW"
-      label: "\\vec{N}"
+      label: "\vec{N}"
     - id: "W"
       type: "arrow"
       direction_logic: "absolute_down"
       color: "RED"
-      label: "\\vec{W}"
+      label: "\vec{W}"
 ---
 # Skenario: Bidang Miring
 

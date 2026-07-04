@@ -2,10 +2,8 @@ import os
 import yaml
 
 def parse_obsidian_file(filepath):
-    """Membelah YAML Frontmatter dan Markdown Body"""
     with open(filepath, 'r') as f:
         content = f.read()
-    
     if content.startswith("---"):
         parts = content.split("---", 2)
         if len(parts) >= 3:
@@ -21,44 +19,41 @@ def retrieve_knowledge(m2_output, repo_path="./metadata"):
     print("[SYSTEM] Mengaktifkan K-4 Retriever (Universal)...")
     knowledge_context = ""
     visual_config = {}
-    
-    # 1. Ambil Aturan Skenario (Domain) Terlebih Dahulu
     domain = m2_output.get("domain", "")
-    dependencies = []
-    
-    if domain:
-        # LOGIKA PEMETAAN ABSOLUT
-        # Kita mendikte mesin, bukan membiarkannya memotong string sembarangan
-        if domain == "bidang_miring":
-            domain_file = "bidang_miring.md"
-        elif domain == "katrol":
-            domain_file = "katrol.md"
-        elif domain == "translasi" or domain == "dinamika_translasi":
-            domain_file = "translasi.md"
-        else:
-            domain_file = f"{domain}.md" # Fallback terakhir
-            
-        domain_path = os.path.join(repo_path, "domain", domain_file)
-        
-        if os.path.exists(domain_path):
-            print(f"[+] Menemukan node domain: {domain_file}")
-            frontmatter, body = parse_obsidian_file(domain_path)
-            
-            knowledge_context += f"\n>>> [SKENARIO: {domain}] <<<\n{body}\n"
-            visual_config = frontmatter.get("visual_hooks", {})
-            dependencies = frontmatter.get("dependencies", [])
-        else:
-            print(f"[-] PERINGATAN: Skenario {domain_file} tidak ditemukan di {domain_path}")
-
-    # 2. Ambil Hukum Fundamental (Dari Dependencies YAML)
+    dependencies = m2_output.get("hukum_terkait", [])
+    domain_file_map = {
+        "bidang_miring": "bidang_miring.md",
+        "collision": "collision.md",
+        "katrol": "katrol.md",
+        "translasi": "translasi.md"
+    }
+    domain_file = domain_file_map.get(domain, f"{domain}.md")
+    domain_path = os.path.join(repo_path, "domain", domain_file)
+    if os.path.exists(domain_path):
+        print(f"[+] Menemukan node domain: {domain_file}")
+        frontmatter, body = parse_obsidian_file(domain_path)
+        knowledge_context += f"
+>>> [SKENARIO: {domain}] <<<
+{body}
+"
+        visual_config = frontmatter.get("visual_hooks", {})
+        yaml_deps = frontmatter.get("dependencies", [])
+        for d in yaml_deps:
+            if d not in dependencies:
+                dependencies.append(d)
+    else:
+        print(f"[-] PERINGATAN: Skenario {domain_file} tidak ditemukan di {domain_path}")
     for hukum in dependencies:
-        path = os.path.join(repo_path, "hukum_dasar", f"{hukum}.md")
-        if os.path.exists(path):
+        hukum_path = os.path.join(repo_path, "hukum_dasar", f"{hukum}.md")
+        if os.path.exists(hukum_path):
             print(f"[+] Menemukan dependensi fundamental: {hukum}.md")
-            _, body = parse_obsidian_file(path)
-            knowledge_context += f"\n>>> [FUNDAMENTAL: {hukum}] <<<\n{body}\n"
+            _, body = parse_obsidian_file(hukum_path)
+            knowledge_context += f"
+>>> [FUNDAMENTAL: {hukum}] <<<
+{body}
+"
         else:
-            print(f"[-] PERINGATAN: Dependensi {hukum}.md tidak ditemukan di rute {path}")
-
+            print(f"[-] PERINGATAN: Dependensi {hukum}.md tidak ditemukan di {hukum_path}")
+    if not visual_config:
+        print("[!] PERINGATAN: visual_hooks kosong untuk domain ini.")
     return knowledge_context, visual_config
-    

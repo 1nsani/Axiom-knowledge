@@ -1,52 +1,59 @@
 import os
-import json
+import sys
+from src.reader import read_problem_file
 from src.analyzer import analyze_physics_problem
 from src.retriever import retrieve_knowledge
-from src.assembler import assemble_prompt
-from src.solver import execute_solver
-from src.bridge import convert_to_manim_data
+from src.extractor_llm import extract_parameters
+from src.bridge_export import export_known_parameters
+import yaml
 
-def run_axiom_engine():
-    print("[SYSTEM] Memulai Eksekusi Jalur DFS Axiom Engine...\n")
-    
+def main():
+    print("[SYSTEM] Axiom Knowledge Brain - Ekstraksi Parameter")
+    problem_text = read_problem_file()
+    if not problem_text:
+        print("[-] Gagal membaca soal.")
+        sys.exit(1)
+    print(f"[+] Soal: {problem_text[:100]}...")
+    m2_data = analyze_physics_problem(problem_text)
+    scene_type = m2_data["domain"]
+    print(f"[+] Domain terdeteksi: {scene_type}")
+    repo_path = "./metadata"
+    konteks_fisika, visual_hooks = retrieve_knowledge(m2_data, repo_path=repo_path)
+    if not konteks_fisika.strip():
+        print("[!] Peringatan: Konteks fisika kosong.")
+    domain_file = os.path.join(repo_path, "domain", f"{scene_type}.md")
+    required_params = []
+    if os.path.exists(domain_file):
+        with open(domain_file, "r") as f:
+            content = f.read()
+        if content.startswith("---"):
+            parts = content.split("---", 2)
+            if len(parts) >= 3:
+                frontmatter = yaml.safe_load(parts[1])
+                required_params = frontmatter.get("required_parameters", [])
+    if not required_params:
+        required_params = ["massa", "sudut", "gaya", "kecepatan", "gravitasi"]
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        print("[-] FATAL ERROR: GEMINI_API_KEY tidak ditemukan.")
-        return
-
-    soal = "Sebuah balok bermassa 4 kg ditarik ke atas bidang miring licin (sudut 30 derajat) dengan gaya 50 N. (g=10)"
-    print(f"[+] Input Soal: {soal}")
-
-    # 1. M-2 Analyzer
-    print("[+] Menjalankan M-2 Analyzer...")
-    m2_data = analyze_physics_problem(soal)
-
-    # 2. M-3 Retriever (K-4 Universal)
-    print("[+] Menjalankan K-4 Retriever...")
-    repo_path = "./metadata" 
-    konteks_fisika, visual_config = retrieve_knowledge(m2_data, repo_path=repo_path)
-    
-    if not konteks_fisika.strip():
-        print("    [!] Peringatan: Konteks fisika kosong.")
-
-    # 3. M-4 Assembler
-    print("[+] Menjalankan M-4 Prompt Assembler...")
-    final_prompt = assemble_prompt(soal, konteks_fisika)
-
-    # 4. M-5 Solver
-    print("[+] Menjalankan M-5 Solver...")
-    solusi_teks = execute_solver(final_prompt, api_key)
-    print("\n--- HASIL M-5 ---\n", solusi_teks[:300], "...\n-----------------")
-
-    # 5. M-6 Bridge (K-5 Universal)
-    print("[+] Menjalankan K-5 Bridge Adapter...")
-    json_file, extracted_data = convert_to_manim_data(solusi_teks, visual_config, api_key)
-
-    if json_file:
-        print(f"[SUCCESS] Payload universal siap di '{json_file}'")
-    else:
-        print(f"[-] FATAL ERROR pada K-5 Bridge: {extracted_data.get('error')}")
+        print("[-] FATAL: GEMINI_API_KEY tidak ditemukan.")
+        sys.exit(1)
+    try:
+        extracted = extract_parameters(
+            problem_text, 
+            konteks_fisika, 
+            visual_hooks, 
+            required_params, 
+            scene_type, 
+            api_key
+        )
+        print("[+] Ekstraksi berhasil.")
+        assert "scene_type" in extracted
+        assert "known" in extracted
+        export_known_parameters(extracted)
+    except Exception as e:
+        print(f"[-] Gagal ekstraksi: {e}")
+        sys.exit(1)
+    print("[SYSTEM] Selesai.")
 
 if __name__ == "__main__":
-    run_axiom_engine()
-    
+    main()
