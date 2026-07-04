@@ -32,10 +32,10 @@ def retrieve_knowledge(m2_output, repo_path="./metadata"):
     if os.path.exists(domain_path):
         print(f"[+] Menemukan node domain: {domain_file}")
         frontmatter, body = parse_obsidian_file(domain_path)
-        knowledge_context += f"
->>> [SKENARIO: {domain}] <<<
-{body}
-"
+        knowledge_context += "
+>>> [SKENARIO: {}] <<<
+{}
+".format(domain, body)
         visual_config = frontmatter.get("visual_hooks", {})
         yaml_deps = frontmatter.get("dependencies", [])
         for d in yaml_deps:
@@ -48,10 +48,10 @@ def retrieve_knowledge(m2_output, repo_path="./metadata"):
         if os.path.exists(hukum_path):
             print(f"[+] Menemukan dependensi fundamental: {hukum}.md")
             _, body = parse_obsidian_file(hukum_path)
-            knowledge_context += f"
->>> [FUNDAMENTAL: {hukum}] <<<
-{body}
-"
+            knowledge_context += "
+>>> [FUNDAMENTAL: {}] <<<
+{}
+".format(hukum, body)
         else:
             print(f"[-] PERINGATAN: Dependensi {hukum}.md tidak ditemukan di {hukum_path}")
     if not visual_config:
