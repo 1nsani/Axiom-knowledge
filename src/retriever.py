@@ -1,53 +1,61 @@
 import os
 import yaml
 
-def parse_obsidian_file(filepath):
-    with open(filepath, 'r') as f:
+
+def parse_obsidian_file(filepath: str):
+    with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
+
     if content.startswith("---"):
         parts = content.split("---", 2)
         if len(parts) >= 3:
             try:
-                frontmatter = yaml.safe_load(parts[1])
+                frontmatter = yaml.safe_load(parts[1]) or {}
                 body = parts[2].strip()
                 return frontmatter, body
-            except Exception as e:
-                print("[-] ERROR Parsing YAML di " + filepath + ": " + str(e))
+            except yaml.YAMLError as e:
+                raise RuntimeError(f"YAML rusak di {filepath}: {e}")
     return {}, content
 
-def retrieve_knowledge(m2_output, repo_path="./metadata"):
-    print("[SYSTEM] Mengaktifkan K-4 Retriever (Universal)...")
-    knowledge_context = ""
-    visual_config = {}
+
+def retrieve_knowledge(m2_output: dict, repo_path: str = "./metadata"):
+    """
+    Return: (knowledge_context, visual_hooks, required_params, optional_params)
+    """
+    print("[SYSTEM] Mengaktifkan Retriever...")
     domain = m2_output.get("domain", "")
-    dependencies = m2_output.get("hukum_terkait", [])
-    domain_file_map = {
-        "bidang_miring": "bidang_miring.md",
-        "collision": "collision.md",
-        "katrol": "katrol.md",
-        "translasi": "translasi.md"
-    }
-    domain_file = domain_file_map.get(domain, domain + ".md")
-    domain_path = os.path.join(repo_path, "domain", domain_file)
-    if os.path.exists(domain_path):
-        print("[+] Menemukan node domain: " + domain_file)
-        frontmatter, body = parse_obsidian_file(domain_path)
-        knowledge_context += "\n>>> [SKENARIO: " + domain + "] <<<\n" + body + "\n"
-        visual_config = frontmatter.get("visual_hooks", {})
-        yaml_deps = frontmatter.get("dependencies", [])
-        for d in yaml_deps:
-            if d not in dependencies:
-                dependencies.append(d)
-    else:
-        print("[-] PERINGATAN: Skenario " + domain_file + " tidak ditemukan di " + domain_path)
+    dependencies = list(m2_output.get("hukum_terkait", []))
+
+    domain_path = os.path.join(repo_path, "domain", f"{domain}.md")
+    if not os.path.exists(domain_path):
+        raise RuntimeError(
+            f"[FATAL] Domain '{domain}' tidak punya metadata di {domain_path}. "
+            f"Pipeline dihentikan untuk mencegah ekstraksi tanpa skema (anti-halusinasi)."
+        )
+
+    print(f"[+] Domain node ditemukan: {domain}.md")
+    frontmatter, body = parse_obsidian_file(domain_path)
+    knowledge_context = f"\n>>> [SKENARIO: {domain}] <<<\n{body}\n"
+    visual_hooks = frontmatter.get("visual_hooks", {})
+    required_params = frontmatter.get("required_parameters", [])
+    optional_params = frontmatter.get("optional_parameters", [])
+
+    for extra_dep in frontmatter.get("dependencies", []):
+        if extra_dep not in dependencies:
+            dependencies.append(extra_dep)
+
     for hukum in dependencies:
-        hukum_path = os.path.join(repo_path, "hukum_dasar", hukum + ".md")
+        hukum_path = os.path.join(repo_path, "hukum_dasar", f"{hukum}.md")
         if os.path.exists(hukum_path):
-            print("[+] Menemukan dependensi fundamental: " + hukum + ".md")
-            _, body = parse_obsidian_file(hukum_path)
-            knowledge_context += "\n>>> [FUNDAMENTAL: " + hukum + "] <<<\n" + body + "\n"
+            print(f"[+] Dependensi fundamental ditemukan: {hukum}.md")
+            _, hukum_body = parse_obsidian_file(hukum_path)
+            knowledge_context += f"\n>>> [FUNDAMENTAL: {hukum}] <<<\n{hukum_body}\n"
         else:
-            print("[-] PERINGATAN: Dependensi " + hukum + ".md tidak ditemukan di " + hukum_path)
-    if not visual_config:
-        print("[!] PERINGATAN: visual_hooks kosong untuk domain ini.")
-    return knowledge_context, visual_config
+            print(f"[!] Peringatan (non-fatal): dependensi {hukum}.md tidak ditemukan.")
+
+    if not visual_hooks:
+        print(f"[!] Peringatan: visual_hooks kosong untuk domain '{domain}'.")
+    if not required_params:
+        print(f"[!] Peringatan: required_parameters kosong untuk domain '{domain}'.")
+
+    return knowledge_context, visual_hooks, required_params, optional_params

@@ -1,26 +1,42 @@
-import re
+# Konvensi WAJIB: value domain di sini harus sama persis (lowercase, snake_case)
+# dengan nama file di metadata/domain/<domain>.md — TIDAK ADA mapping terpisah.
 
-def analyze_physics_problem(problem_text):
+DOMAIN_KEYWORDS = {
+    "bidang_miring": ["bidang miring"],
+    "collision": ["tumbukan", "bertumbukan", "momentum"],
+    "katrol": ["katrol"],
+}
+
+DEFAULT_DOMAIN = "translasi"
+
+ENTITY_KEYWORDS = {
+    "Balok": ["balok"],
+    "Bidang_Miring": ["bidang miring"],
+    "Katrol": ["katrol"],
+    "Tumbukan": ["tumbukan", "momentum", "bertumbukan"],
+}
+
+
+def analyze_physics_problem(problem_text: str) -> dict:
     text = problem_text.lower()
-    entitas_ditemukan = []
-    if "balok" in text: entitas_ditemukan.append("Balok")
-    if "bidang miring" in text: entitas_ditemukan.append("Bidang_Miring")
-    if "katrol" in text: entitas_ditemukan.append("Katrol")
-    if "tumbukan" in text or "momentum" in text or "bertumbukan" in text:
-        entitas_ditemukan.append("Tumbukan")
-    if "bidang miring" in text:
-        domain = "bidang_miring"
-    elif "tumbukan" in text or "momentum" in text:
-        domain = "collision"
-    elif "katrol" in text:
-        domain = "katrol"
-    else:
-        domain = "translasi"
+
+    entitas_ditemukan = [
+        nama for nama, kw_list in ENTITY_KEYWORDS.items()
+        if any(kw in text for kw in kw_list)
+    ]
+
+    domain = DEFAULT_DOMAIN
+    for domain_name, kw_list in DOMAIN_KEYWORDS.items():
+        if any(kw in text for kw in kw_list):
+            domain = domain_name
+            break
+
     hukum_terkait = ["Hukum_Newton_2"]
     if domain == "collision":
         hukum_terkait.append("Hukum_Kekekalan_Momentum")
+
     return {
         "domain": domain,
         "entitas": entitas_ditemukan,
-        "hukum_terkait": hukum_terkait
+        "hukum_terkait": hukum_terkait,
     }

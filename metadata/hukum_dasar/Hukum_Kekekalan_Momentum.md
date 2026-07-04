@@ -7,4 +7,4 @@ vektor_terlibat:
 
 # Hukum Kekekalan Momentum
 Dalam sistem tertutup (tanpa gaya luar), momentum total sistem adalah kekal.
-Untuk tumbukan 1D: m1 v1 + m2 v2 = m1 v1' + m2 v2'
+Untuk tumbukan 1D: `m1*v1 + m2*v2 = m1*v1' + m2*v2'`
