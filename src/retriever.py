@@ -12,7 +12,7 @@ def parse_obsidian_file(filepath):
                 body = parts[2].strip()
                 return frontmatter, body
             except Exception as e:
-                print(f"[-] ERROR Parsing YAML di {filepath}: {e}")
+                print("[-] ERROR Parsing YAML di " + filepath + ": " + str(e))
     return {}, content
 
 def retrieve_knowledge(m2_output, repo_path="./metadata"):
@@ -27,33 +27,27 @@ def retrieve_knowledge(m2_output, repo_path="./metadata"):
         "katrol": "katrol.md",
         "translasi": "translasi.md"
     }
-    domain_file = domain_file_map.get(domain, f"{domain}.md")
+    domain_file = domain_file_map.get(domain, domain + ".md")
     domain_path = os.path.join(repo_path, "domain", domain_file)
     if os.path.exists(domain_path):
-        print(f"[+] Menemukan node domain: {domain_file}")
+        print("[+] Menemukan node domain: " + domain_file)
         frontmatter, body = parse_obsidian_file(domain_path)
-        knowledge_context += "
->>> [SKENARIO: {}] <<<
-{}
-".format(domain, body)
+        knowledge_context += "\n>>> [SKENARIO: " + domain + "] <<<\n" + body + "\n"
         visual_config = frontmatter.get("visual_hooks", {})
         yaml_deps = frontmatter.get("dependencies", [])
         for d in yaml_deps:
             if d not in dependencies:
                 dependencies.append(d)
     else:
-        print(f"[-] PERINGATAN: Skenario {domain_file} tidak ditemukan di {domain_path}")
+        print("[-] PERINGATAN: Skenario " + domain_file + " tidak ditemukan di " + domain_path)
     for hukum in dependencies:
-        hukum_path = os.path.join(repo_path, "hukum_dasar", f"{hukum}.md")
+        hukum_path = os.path.join(repo_path, "hukum_dasar", hukum + ".md")
         if os.path.exists(hukum_path):
-            print(f"[+] Menemukan dependensi fundamental: {hukum}.md")
+            print("[+] Menemukan dependensi fundamental: " + hukum + ".md")
             _, body = parse_obsidian_file(hukum_path)
-            knowledge_context += "
->>> [FUNDAMENTAL: {}] <<<
-{}
-".format(hukum, body)
+            knowledge_context += "\n>>> [FUNDAMENTAL: " + hukum + "] <<<\n" + body + "\n"
         else:
-            print(f"[-] PERINGATAN: Dependensi {hukum}.md tidak ditemukan di {hukum_path}")
+            print("[-] PERINGATAN: Dependensi " + hukum + ".md tidak ditemukan di " + hukum_path)
     if not visual_config:
         print("[!] PERINGATAN: visual_hooks kosong untuk domain ini.")
     return knowledge_context, visual_config
