@@ -3,7 +3,7 @@
 
 DOMAIN_KEYWORDS = {
     "bidang_miring": ["bidang miring"],
-    "collision": ["tumbukan", "bertumbukan", "momentum"],
+    "collision": ["tumbukan", "bertumbukan", "momentum", "restitusi"],
     "katrol": ["katrol"],
 }
 
@@ -15,7 +15,6 @@ ENTITY_KEYWORDS = {
     "Katrol": ["katrol"],
     "Tumbukan": ["tumbukan", "momentum", "bertumbukan"],
 }
-
 
 def analyze_physics_problem(problem_text: str) -> dict:
     text = problem_text.lower()

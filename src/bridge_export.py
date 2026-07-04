@@ -1,9 +1,8 @@
 import json
 import os
 
-
 def export_known_parameters(scene_type: str, known: dict, visual_hooks: dict,
-                             shared_dir: str = "/content/drive/MyDrive/axiom_shared") -> str:
+                             shared_dir: str = "/tmp/axiom_shared") -> str:
     payload = {
         "scene_type": scene_type,
         "known": known,
