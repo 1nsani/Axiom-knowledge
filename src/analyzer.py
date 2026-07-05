@@ -1,10 +1,8 @@
-# Konvensi WAJIB: value domain di sini harus sama persis (lowercase, snake_case)
-# dengan nama file di metadata/domain/<domain>.md — TIDAK ADA mapping terpisah.
-
+# Konvensi WAJIB: value domain harus sama persis dengan nama file di metadata/domain/<domain>.md
 DOMAIN_KEYWORDS = {
     "bidang_miring": ["bidang miring"],
     "collision": ["tumbukan", "bertumbukan", "momentum", "restitusi"],
-    "katrol": ["katrol"],
+    "katrol": ["katrol", "pulley", "atwood"],
 }
 
 DEFAULT_DOMAIN = "translasi"
@@ -18,22 +16,18 @@ ENTITY_KEYWORDS = {
 
 def analyze_physics_problem(problem_text: str) -> dict:
     text = problem_text.lower()
-
     entitas_ditemukan = [
         nama for nama, kw_list in ENTITY_KEYWORDS.items()
         if any(kw in text for kw in kw_list)
     ]
-
     domain = DEFAULT_DOMAIN
     for domain_name, kw_list in DOMAIN_KEYWORDS.items():
         if any(kw in text for kw in kw_list):
             domain = domain_name
             break
-
     hukum_terkait = ["Hukum_Newton_2"]
     if domain == "collision":
         hukum_terkait.append("Hukum_Kekekalan_Momentum")
-
     return {
         "domain": domain,
         "entitas": entitas_ditemukan,
