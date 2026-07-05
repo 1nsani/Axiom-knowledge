@@ -37,6 +37,11 @@ visual_hooks:
       direction_logic: "parallel_up"
       color: "GREEN"
       label: "F_{\\text{tarik}}"
+    - id: "F_45"
+      type: "arrow"
+      angle_deg: 45
+      color: "ORANGE"
+      label: "F_{45}"
 ---
 # Skenario: Bidang Miring
 
