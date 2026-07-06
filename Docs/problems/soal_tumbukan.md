@@ -1,0 +1,1 @@
+Benda bermassa 3 kg bergerak 4 m/s, benda bermassa 5 kg bergerak -2 m/s. Koefisien restitusi 0.8.

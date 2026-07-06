@@ -1,0 +1,1 @@
+Sebuah benda bergerak dengan kecepatan awal tertentu. (soal tidak lengkap)

@@ -1,0 +1,1 @@
+Sebuah balok bermassa 5 kg meluncur pada bidang miring 37 derajat tanpa gesekan. (g=10 m/s²)
