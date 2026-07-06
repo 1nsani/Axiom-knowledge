@@ -20,6 +20,16 @@ visual_hooks:
       direction_logic: "absolute_up"
       color: "PURPLE"
       label: "T_2"
+    - id: "W1"
+      type: "arrow"
+      direction_logic: "absolute_down"
+      color: "RED"
+      label: "W_1"
+    - id: "W2"
+      type: "arrow"
+      direction_logic: "absolute_down"
+      color: "RED"
+      label: "W_2"
 ---
 # Skenario: Katrol Sederhana (Atwood Machine)
 Dua massa dihubungkan oleh tali melalui katrol licin tanpa massa.
