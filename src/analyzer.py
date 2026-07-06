@@ -1,8 +1,8 @@
-# Konvensi WAJIB: value domain harus sama persis dengan nama file di metadata/domain/<domain>.md
 DOMAIN_KEYWORDS = {
     "bidang_miring": ["bidang miring"],
     "collision": ["tumbukan", "bertumbukan", "momentum", "restitusi"],
     "katrol": ["katrol", "pulley", "atwood"],
+    "gerak_parabola": ["parabola", "peluru", "proyektil", "elevasi"],
 }
 
 DEFAULT_DOMAIN = "translasi"
@@ -12,6 +12,7 @@ ENTITY_KEYWORDS = {
     "Bidang_Miring": ["bidang miring"],
     "Katrol": ["katrol"],
     "Tumbukan": ["tumbukan", "momentum", "bertumbukan"],
+    "Proyektil": ["parabola", "peluru", "proyektil"],
 }
 
 def analyze_physics_problem(problem_text: str) -> dict:
