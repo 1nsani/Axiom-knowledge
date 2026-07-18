@@ -4,6 +4,7 @@ DOMAIN_KEYWORDS = {
     "katrol": ["katrol", "pulley", "atwood"],
     "gerak_parabola": ["parabola", "peluru", "proyektil", "elevasi"],
     "tumbukan_beruntun": ["tiga benda", "berjajar", "beruntun", "berantai", "tumbukan beruntun"],
+    "bidang_miring_katrol_gabungan": ["bidang miring katrol", "bidang miring dengan katrol", "bidang miring dan katrol", "tergantung pada katrol"],
 }
 
 KRITIS_KEYWORDS = ["nilai maksimum", "nilai minimum", "agar", "supaya terjadi tepat", "tepat", "kritis"]
